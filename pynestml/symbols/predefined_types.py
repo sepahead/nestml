@@ -21,7 +21,7 @@
 
 from typing import Mapping
 
-from astropy.units.core import CompositeUnit
+from astropy.units.core import CompositeUnit, UnitBase
 from astropy.units.quantity import Quantity
 
 from pynestml.symbols.predefined_units import PredefinedUnits
@@ -166,7 +166,9 @@ class PredefinedTypes:
         # this case deals with something like 1.0 if we have (ms/ms)
         if isinstance(name, CompositeUnit) and len(name.bases) == 0:
             return cls.get_real_type()
-        if isinstance(name, CompositeUnit):
+        # this case deals with composite units (e.g. "V s"), but also with named units (e.g. "V"), which astropy returns
+        # for products and quotients with a dimensionless factor of 1, e.g. V * (s * Hz) = V
+        if isinstance(name, UnitBase):
             cls.register_unit(name)
             return cls.get_type(str(name))
         if isinstance(name, Quantity):
