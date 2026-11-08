@@ -167,7 +167,10 @@ class ConvolutionsToBuffersTransformer(Transformer):
         printer._simple_expression_printer = NESTMLSimpleExpressionPrinterUnitsAsFactors(variable_printer=printer._variable_printer, function_call_printer=printer._function_call_printer, constant_printer=printer._constant_printer)
         printer._expression_printer._simple_expression_printer = printer._simple_expression_printer
 
-        expr_str = printer.print(expr)
+        # print the coefficient as it is written in the model: an implicit conversion factor of a sum would also convert the unit 1/s of the spike input port to 1/ms, whereas the update upon a spike integrates the Dirac delta function over time
+        expr_without_factors = expr.clone()
+        expr_without_factors.accept(ASTHigherOrderVisitor(visit_funcs=lambda node: node.set_implicit_conversion_factor(None)))
+        expr_str = printer.print(expr_without_factors)
 
         root_node = expr
         while not isinstance(root_node, ASTModel):
