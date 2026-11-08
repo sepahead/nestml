@@ -208,7 +208,7 @@ class Synapse_{{ astnode.name }}(Synapse):
   #   Functions defined in the NESTML model
   # ---------------------------------------------------------------------------
 {% for function in astnode.get_functions() -%}
-  {{ function_declaration.FunctionDeclaration(function, astnode.name) }}:
+  {{ function_declaration.FunctionDeclaration(function) | indent(2) }}:
 {%-   filter indent(4,True) %}
 {%-   with ast = function.get_stmts_body() %}
 {%-     include "directives_py/StmtsBody.jinja2" %}

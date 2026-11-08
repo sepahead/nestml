@@ -145,7 +145,12 @@ class PythonFunctionCallPrinter(FunctionCallPrinter):
         if function_call.get_name() == PredefinedFunctions.EMIT_SPIKE:
             return "self.emit_spike(origin)"
 
-        s = function_call.get_name()
+        s = ""
+        if not function_call.get_name() in PredefinedFunctions.name2function.keys():
+            # not a predefined function, so it is a method of the model class
+            s += "self."
+
+        s += function_call.get_name()
 
         s += "("
         if ASTUtils.needs_arguments(function_call):
