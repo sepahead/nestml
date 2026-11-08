@@ -1,0 +1,40 @@
+# ode_unit_literals_neuron.nestml
+# ###############################
+#
+# Tests that numeric literals with a physical unit in ODEs are converted to the units that NEST uses, for example ``0.01 s`` to 10 ms.
+#
+# Copyright statement
+# +++++++++++++++++++
+#
+# This file is part of NEST.
+#
+# Copyright (C) 2004 The NEST Initiative
+#
+# NEST is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# NEST is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NEST.  If not, see <http://www.gnu.org/licenses/>.
+#
+model ode_unit_literals_neuron:
+    state:
+        b real = 1
+        c mV = 0 mV
+        I pA = 0 pA
+        d real = 1
+
+    equations:
+        b' = -b / (0.01 s)
+        c' = (1 V - c) / (10 ms)
+        I' = (1 pA + 1 nA - I) / (10 ms)
+        d' = -d * exp(1 ms / 1 s) / (10 ms)
+
+    update:
+        integrate_odes()

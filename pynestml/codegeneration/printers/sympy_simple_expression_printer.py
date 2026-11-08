@@ -19,6 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with NEST.  If not, see <http://www.gnu.org/licenses/>.
 
+from astropy import units
+
 from pynestml.codegeneration.nest_unit_converter import NESTUnitConverter
 from pynestml.codegeneration.printers.cpp_simple_expression_printer import CppSimpleExpressionPrinter
 from pynestml.codegeneration.printers.simple_expression_printer import SimpleExpressionPrinter
@@ -33,9 +35,36 @@ from pynestml.symbols.symbol import SymbolKind
 class SympySimpleExpressionPrinter(CppSimpleExpressionPrinter):
     r"""
     Printer for ASTSimpleExpressions in Sympy syntax.
+
+    If ``print_literals_in_nest_units`` is True, a numeric literal with a physical unit is printed in NEST units, as the C++ printers print it; for example, ``0.01 s`` is printed as ``10.``. Otherwise, it is printed in the unit in which it is written.
     """
 
+    def __init__(self, variable_printer, constant_printer, function_call_printer, print_literals_in_nest_units: bool = False) -> None:
+        super().__init__(variable_printer=variable_printer, constant_printer=constant_printer, function_call_printer=function_call_printer)
+        self.print_literals_in_nest_units = print_literals_in_nest_units
+
+    def get_unit_literal_factor(self, node: ASTSimpleExpression) -> float:
+        r"""
+        Return the factor with which this printer multiplies the value of ``node``: the factor that converts a numeric literal with a physical unit to NEST units if ``print_literals_in_nest_units`` is True, and 1 otherwise.
+        """
+        if not (self.print_literals_in_nest_units and node.is_numeric_literal_with_unit()):
+            return 1.
+
+        try:
+            factor = NESTUnitConverter.get_factor(units.Unit(str(node.unitType)))
+        except BaseException:
+            return 1.
+
+        if not isinstance(factor, (int, float)):
+            # e.g. a dimensionless unit such as "percent"
+            return 1.
+
+        return factor
+
     def print_simple_expression(self, node: ASTSimpleExpression) -> str:
+        factor = self.get_unit_literal_factor(node)
+        if not factor == 1:
+            return self._constant_printer.print_constant(factor * node.get_numeric_literal())
 
         if node.is_numeric_literal():
             return self._constant_printer.print_constant(node.get_numeric_literal())
@@ -46,13 +75,6 @@ class SympySimpleExpressionPrinter(CppSimpleExpressionPrinter):
             if not node_is_variable_symbol and PredefinedUnits.is_unit(node.variable.get_complete_name()):
                 # case for a literal unit, e.g. "ms"
                 return str(NESTUnitConverter.get_factor(PredefinedUnits.get_unit(node.variable.get_complete_name()).get_unit()))
-
-        if node.is_numeric_literal_with_unit():
-            if self._variable_printer.print(node.get_variable()) in ["1", "1.", "1.0"]:
-                return str(node.get_numeric_literal())
-
-            return str(node.get_numeric_literal()) + " * " + \
-                self._variable_printer.print(node.get_variable())
 
         if node.is_numeric_literal():
             return str(node.get_numeric_literal())

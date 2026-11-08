@@ -81,7 +81,8 @@ class ODEToolboxTransformer(Transformer):
         self._ode_toolbox_function_call_printer = ODEToolboxFunctionCallPrinter(None)
         self._ode_toolbox_printer = ODEToolboxExpressionPrinter(simple_expression_printer=SympySimpleExpressionPrinter(variable_printer=self._ode_toolbox_variable_printer,
                                                                                                                        constant_printer=self._constant_printer,
-                                                                                                                       function_call_printer=self._ode_toolbox_function_call_printer))
+                                                                                                                       function_call_printer=self._ode_toolbox_function_call_printer,
+                                                                                                                       print_literals_in_nest_units=True))
         self._ode_toolbox_variable_printer._expression_printer = self._ode_toolbox_printer
         self._ode_toolbox_function_call_printer._expression_printer = self._ode_toolbox_printer
 
