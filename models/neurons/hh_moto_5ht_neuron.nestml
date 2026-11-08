@@ -88,7 +88,7 @@ model hh_moto_5ht_neuron:
         Act_mc' = (mc_inf(V_m) - Act_mc) / mc_tau
         Act_hc' = (hc_inf(V_m) - Act_hc) / hc_tau
 
-        Ca_in' = (0.01 s**-1) * (-alpha * (I_Ca_N + I_Ca_L) - 4. * Ca_in)
+        Ca_in' = (0.01 ms**-1) * (-alpha * (I_Ca_N + I_Ca_L) - 4. * Ca_in)
 
     parameters:
         refr_T ms = 2 ms                 # Duration of refractory period
