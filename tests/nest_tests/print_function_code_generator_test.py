@@ -19,6 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with NEST.  If not, see <http://www.gnu.org/licenses/>.
 import os
+import re
 import unittest
 
 from pynestml.codegeneration.nest_code_generator import NESTCodeGenerator
@@ -136,6 +137,35 @@ class PrintCodeGeneratorTest(unittest.TestCase):
         with open(str(os.path.realpath(os.path.join(os.path.dirname(__file__), os.path.join(
                 os.pardir, "target", "print_test_function.cpp")))), "r") as reader:
             self.assertEqual(reader.read().count("std::cout"), 5)
+
+    def test_print_statement_with_escaped_brace(self):
+        input_path = str(os.path.realpath(os.path.join(os.path.dirname(__file__), os.path.join(
+            "resources", "PrintStatementWithEscapedBrace.nestml"))))
+
+        params = list()
+        params.append("--input_path")
+        params.append(input_path)
+        params.append("--logging_level")
+        params.append("INFO")
+        params.append("--target_path")
+        params.append(self.target_path)
+        params.append("--dev")
+        FrontendConfiguration.parse_config(params)
+        compilation_unit = ModelParser.parse_file(input_path)
+
+        nestCodeGenerator = NESTCodeGenerator()
+        nestCodeGenerator.generate_code(compilation_unit.get_model_list(), metadata={})
+
+        with open(str(os.path.realpath(os.path.join(os.path.dirname(__file__), os.path.join(
+                os.pardir, "target", "print_test_escaped_brace.cpp")))), "r") as reader:
+            code = reader.read()
+
+        self.assertEqual(code.count("static_assert"), 1)
+
+        # join the lines that end with a backslash, then remove comments and string literals
+        code = re.sub(r"\\[ \t]*\n", "", code)
+        code = re.sub(r"//[^\n]*|/\*.*?\*/|\"(?:\\.|[^\"\\\n])*\"|'(?:\\.|[^'\\\n])*'", " ", code, flags=re.DOTALL)
+        self.assertEqual(code.count("static_assert"), 0)
 
     def tearDown(self):
         import shutil

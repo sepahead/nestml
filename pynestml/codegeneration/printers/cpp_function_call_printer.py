@@ -224,4 +224,7 @@ class CppFunctionCallPrinter(FunctionCallPrinter):
                 right = " " + ASTUtils.get_unit_name(ast_var) + right
             return fun_left(left) + self._expression_printer.print(ast_var) + fun_right(right)
 
+        if (len(stmt) - len(stmt.rstrip("\\"))) % 2 == 1:
+            stmt += "\\"  # the backslash of an escaped "{" must not escape the closing double quote
+
         return "\"" + stmt + "\""  # format bare string in C++ (add double quotes)
