@@ -25,6 +25,7 @@ from enum import Enum
 from pynestml.meta_model.ast_expression import ASTExpression
 from pynestml.meta_model.ast_input_port import ASTInputPort
 from pynestml.meta_model.ast_kernel import ASTKernel
+from pynestml.meta_model.ast_node import ASTNode
 from pynestml.meta_model.ast_simple_expression import ASTSimpleExpression
 from pynestml.meta_model.ast_ode_equation import ASTOdeEquation
 from pynestml.symbol_table.scope import Scope
@@ -428,5 +429,5 @@ class VariableSymbol(Symbol):
         # in the last part, delete the new line if it is the last comment, otherwise there is an ugly gap
         # between the comment and the element
         for comment in self.get_comment():
-            ret += prefix + comment + ("\n" if self.get_comment().index(comment) < len(self.get_comment()) - 1 else "")
+            ret += prefix + ASTNode.escape_comment(comment) + ("\n" if self.get_comment().index(comment) < len(self.get_comment()) - 1 else "")
         return ret
