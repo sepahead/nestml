@@ -164,3 +164,10 @@ class TestUnitSystem:
         printed_return_stmt = self.print_first_return_statement_in_first_declared_function(model)
 
         assert printed_return_stmt == "(0.001 * (bar))"
+
+    def test_dimensionless_unit_product_as_factor(self):
+        # (1 s * 1 Hz) and (1 ms * 1 kHz) are dimensionless, so V * (s * Hz) is V and mV * (ms * kHz) is mV
+        model = ModelParser.parse_file(os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), "resources")), "DimensionlessUnitProductAsFactor.nestml"))
+
+        assert self.print_rhs_of_first_declaration_in_state_block(model) == "(1000.0 * (1 V * (1 s * 1 Hz)))"
+        assert self.print_rhs_of_first_assignment_in_update_block(model) == "1 ms * 1 kHz"
