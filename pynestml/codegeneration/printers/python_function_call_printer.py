@@ -120,6 +120,9 @@ class PythonFunctionCallPrinter(FunctionCallPrinter):
             right = " " + ASTUtils.get_unit_name(ast_var) + right  # concatenate unit separated by a space with the right part of the string
             return fun_left(left) + self._expression_printer.print(ast_var) + fun_right(right)
 
+        if (len(stmt) - len(stmt.rstrip("\\"))) % 2 == 1:
+            stmt += "\\"  # the backslash of an escaped "{" must not escape the closing double quote
+
         return "\"" + stmt + "\""  # format bare string in Python (add double quotes)
 
     def _print_function_call_format_string(self, function_call: ASTFunctionCall) -> str:
