@@ -1,0 +1,51 @@
+# inline_expression_conversion_factors_neuron.nestml
+# ##################################################
+#
+# Description
+# +++++++++++
+#
+# Used to test that the implicit conversion factors of the expressions in an equations block are kept when the inline expressions of the block are expanded. The expressions use only variables in Hz and kHz, because NEST does not convert either unit.
+#
+#
+# Copyright statement
+# +++++++++++++++++++
+#
+# This file is part of NEST.
+#
+# Copyright (C) 2004 The NEST Initiative
+#
+# NEST is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# NEST is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NEST.  If not, see <http://www.gnu.org/licenses/>.
+#
+model inline_expression_conversion_factors_neuron:
+    state:
+        r_ode Hz = 0 Hz
+        r_sum Hz = 0 Hz
+        r_khz Hz = 0 Hz
+        r_sum_out Hz = 0 Hz
+
+    equations:
+        inline r_inf_sum Hz = rate_hz + rate_khz    # 1001 Hz
+        inline r_inf_khz Hz = rate_khz    # 1000 Hz
+        r_ode' = (rate_hz + rate_khz - r_ode) / tau
+        r_sum' = (r_inf_sum - r_sum) / tau
+        r_khz' = (r_inf_khz - r_khz) / tau
+
+    parameters:
+        rate_hz Hz = 1 Hz
+        rate_khz kHz = 1 kHz
+        tau ms = 1 ms
+
+    update:
+        integrate_odes()
+        r_sum_out = r_inf_sum

@@ -51,8 +51,8 @@
 model hh_cond_exp_destexhe_neuron:
 
     state:
-        g_noise_exc uS = g_noise_exc0
-        g_noise_inh uS = g_noise_inh0
+        g_noise_exc nS = g_noise_exc0
+        g_noise_inh nS = g_noise_inh0
 
         V_m mV = E_L        # Membrane potential
         V_m_old mV = E_L    # Membrane potential at the previous timestep
@@ -119,10 +119,10 @@ model hh_cond_exp_destexhe_neuron:
         g_M nS = 173.18 nS         # Conductance of non-inactivating K+ channel
 
         # Conductance OU noise
-        g_noise_exc0 uS = 0.012 uS		# Mean of the excitatory noise conductance
-        g_noise_inh0 uS = 0.057 uS		# Mean of the inhibitory noise conductance
-        sigma_noise_exc uS = 0.003 uS	# Standard deviation of the excitatory noise conductance
-        sigma_noise_inh uS = 0.0066 uS	# Standard deviation of the inhibitory noise conductance
+        g_noise_exc0 nS = 12 nS		# Mean of the excitatory noise conductance
+        g_noise_inh0 nS = 57 nS		# Mean of the inhibitory noise conductance
+        sigma_noise_exc nS = 3 nS	# Standard deviation of the excitatory noise conductance
+        sigma_noise_inh nS = 6.6 nS	# Standard deviation of the inhibitory noise conductance
 
         alpha_n_init 1/ms = 0.032 / (1 ms * mV) * (15 mV - V_m) / (exp((15 mV - V_m) / 5 mV) - 1)
         beta_n_init 1/ms = 0.5 / 1 ms * exp((10 mV - V_m) / 40 mV)
@@ -140,8 +140,8 @@ model hh_cond_exp_destexhe_neuron:
         I_e pA = 0 pA
 
     internals:
-        D_exc uS**2/ms = 2 * sigma_noise_exc**2 / tau_syn_exc
-        D_inh uS**2/ms = 2 * sigma_noise_inh**2 / tau_syn_inh
+        D_exc nS**2/ms = 2 * sigma_noise_exc**2 / tau_syn_exc
+        D_inh nS**2/ms = 2 * sigma_noise_inh**2 / tau_syn_inh
         unit_psg nS = 1 nS    # Unitary postsynaptic conductance amplitude
 
     input:
@@ -154,8 +154,8 @@ model hh_cond_exp_destexhe_neuron:
 
     update:
         # Hodgkin-Huxley type model: ODEs are always integrated, regardless of refractory state
-        A_exc uS = ((D_exc * tau_syn_exc / 2) * (1 - exp(-2 * timestep() / tau_syn_exc)))**.5
-        A_inh uS = ((D_inh * tau_syn_inh / 2) * (1 - exp(-2 * timestep() / tau_syn_inh)))**.5
+        A_exc nS = ((D_exc * tau_syn_exc / 2) * (1 - exp(-2 * timestep() / tau_syn_exc)))**.5
+        A_inh nS = ((D_inh * tau_syn_inh / 2) * (1 - exp(-2 * timestep() / tau_syn_inh)))**.5
         g_noise_exc = g_noise_exc0 + (g_noise_exc - g_noise_exc0) * exp(-timestep() / tau_syn_exc) + A_exc * random_normal(0, 1)
         g_noise_inh = g_noise_inh0 + (g_noise_inh - g_noise_inh0) * exp(-timestep() / tau_syn_inh) + A_inh * random_normal(0, 1)
 
