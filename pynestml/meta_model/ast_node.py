@@ -24,6 +24,7 @@ from __future__ import annotations
 from typing import Optional, List
 
 from abc import ABCMeta, abstractmethod
+import re
 
 from pynestml.symbol_table.scope import Scope
 from pynestml.utils.ast_source_location import ASTSourceLocation
@@ -191,9 +192,19 @@ class ASTNode(metaclass=ABCMeta):
         # in the last part, delete the new line if it is the last comment, otherwise there is an ugly gap
         # between the comment and the element
         for comment in self.get_comment():
-            ret += (prefix + " " if prefix is not None else "") + comment + \
+            ret += (prefix + " " if prefix is not None else "") + ASTNode.escape_comment(comment) + \
                    ("\n" if self.get_comment().index(comment) < len(self.get_comment()) - 1 else "")
         return ret
+
+    @staticmethod
+    def escape_comment(comment: str) -> str:
+        r"""
+        Escapes one line of a comment, so that it cannot end a comment block in generated C or C++ code. "*/" would end the block. "*" followed by a backslash at the end of the line would end it too if the next line starts with "/", because the compiler joins lines that end with a backslash.
+        :param comment: one line of a comment
+        :return: the escaped line
+        """
+        comment = comment.replace("*/", "*\\/")
+        return re.sub(r"\*(?=\\\s*$)", "* ", comment)
 
     def get_comments(self):
         comments = list()

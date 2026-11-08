@@ -518,7 +518,7 @@ class ASTModel(ASTNode):
 
         ret = ""
         for comment in self.get_comment():
-            ret += prefix + comment + "\n"
+            ret += prefix + ASTNode.escape_comment(comment) + "\n"
 
         return ret
 
